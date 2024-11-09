@@ -3,6 +3,11 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from PIL import Image
 
+"""
+DO NOT SUBMIT THIS FILE!
+I have written down the built-in FFT functions here to compare our result with the built-in functions.
+"""
+
 def process_image_fft(image_path: str):
     """
     Load an image, compute its FFT, and display the results.
