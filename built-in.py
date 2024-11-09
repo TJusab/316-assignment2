@@ -17,6 +17,12 @@ def process_image_fft(image_path: str):
     """
     # Load and convert image to grayscale
     image = Image.open(image_path).convert('L')
+    
+    max_size = 256
+    if max(image.size) > max_size:
+        print(f"Resizing image to {max_size}x{max_size} for computational efficiency")
+        image = image.resize((max_size, max_size))
+    
     image_array = np.array(image)
     
     # Compute 2D FFT
@@ -51,16 +57,4 @@ def process_image_fft(image_path: str):
     plt.show()
 
 if __name__ == "__main__":
-    try:
-        process_image_fft('moonlanding.png')
-    except FileNotFoundError:
-        print("Image not found. Creating and processing a test pattern...")
-        
-        # Create a simple test pattern
-        test_size = 256
-        test_pattern = np.zeros((test_size, test_size))
-        test_pattern[test_size//4:3*test_size//4, test_size//4:3*test_size//4] = 1
-        
-        plt.imsave('test_pattern.png', test_pattern, cmap='gray')
-        print("Created test pattern 'test_pattern.png'")
-        process_image_fft('test_pattern.png')
+    process_image_fft('moonlanding.png')
