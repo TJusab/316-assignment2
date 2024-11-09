@@ -110,17 +110,5 @@ class Naive_DFT_Implementation:
         plt.show()
 
 if __name__ == "__main__":
-    try:
-        dft = Naive_DFT_Implementation()
-        dft.process_and_display_image('moonlanding.png')
-    except FileNotFoundError:
-        print("Image not found. Creating and processing a test pattern...")
-        
-        # Create a simple test pattern
-        test_size = 64
-        test_pattern = np.zeros((test_size, test_size))
-        test_pattern[test_size//4:3*test_size//4, test_size//4:3*test_size//4] = 1
-        
-        plt.imsave('test_pattern.png', test_pattern, cmap='gray')
-        print("Created test pattern 'test_pattern.png'")
-        dft.process_and_display_image('test_pattern.png')
+    dft = Naive_DFT_Implementation()
+    dft.process_and_display_image('moonlanding.png')
