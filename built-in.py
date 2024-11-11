@@ -55,6 +55,49 @@ def process_image_fft(image_path: str):
     
     plt.tight_layout()
     plt.show()
+    
+def denoise(image_array: np.ndarray, cutoff_ratio: float = 0.1) -> np.ndarray:
+    # Perform 2D FFT on the image using numpy's fft2
+    fft_result = np.fft.fftshift(np.fft.fft2(image_array))
+    
+    # Calculate cutoff frequencies
+    M, N = fft_result.shape
+    cutoff_x = int(M * cutoff_ratio / 2)
+    cutoff_y = int(N * cutoff_ratio / 2)
+    
+    # Create a mask for the low frequencies (central square) and apply it
+    mask = np.zeros_like(fft_result)
+    mask[M//2 - cutoff_x : M//2 + cutoff_x, N//2 - cutoff_y : N//2 + cutoff_y] = 1
+    filtered_fft = fft_result * mask
+    
+    # Count non-zero coefficients in the filtered FFT and calculate fraction retained
+    non_zero_count = np.count_nonzero(filtered_fft)
+    total_coefficients = M * N
+    fraction_retained = non_zero_count / total_coefficients
+    
+    # Print the non-zero coefficient count and fraction retained
+    print(f"Non-zero coefficients retained: {non_zero_count}")
+    print(f"Fraction of original Fourier coefficients retained: {fraction_retained:.4f}")
+    
+    # Perform the inverse FFT to obtain the denoised image
+    denoised_image = np.fft.ifft2(np.fft.ifftshift(filtered_fft)).real
+    
+    # Return the real part of the denoised image
+    return denoised_image
 
 if __name__ == "__main__":
-    process_image_fft('moonlanding.png')
+    # Load and convert image to grayscale
+    image = Image.open("moonlanding.png").convert('L')
+    
+    max_size = 256
+    if max(image.size) > max_size:
+        print(f"Resizing image to {max_size}x{max_size} for computational efficiency")
+        image = image.resize((max_size, max_size))
+    
+    image_array = np.array(image)
+    
+    denoised_image = denoise(image_array, cutoff_ratio=0.2)
+    plt.imshow(denoised_image, cmap='gray')
+    plt.title('Denoised Image')
+    plt.axis('off')
+    plt.show()
