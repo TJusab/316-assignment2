@@ -46,12 +46,12 @@ def compare_fft_implementations(image_path):
     print(f"Max phase difference: {np.max(phase_diff)}")
     
     # Plotting
-    fig, axs = plt.subplots(2, 3, figsize=(15, 10))
+    fig, axs = plt.subplots(1, 3, figsize=(15, 10))
     
     # Original Image
-    axs[0, 0].imshow(image_array, cmap='gray')
-    axs[0, 0].set_title('Original Image')
-    axs[0, 0].axis('off')
+    axs[0].imshow(image_array, cmap='gray')
+    axs[0].set_title('Original Image')
+    axs[0].axis('off')
     
     # Magnitude Spectrums (log scale)
     from matplotlib.colors import LogNorm
@@ -59,34 +59,17 @@ def compare_fft_implementations(image_path):
     custom_magnitude = np.abs(custom_shifted_fft)
     numpy_magnitude = np.abs(numpy_shifted_fft)
     
-    im1 = axs[0, 1].imshow(np.log1p(custom_magnitude), 
-                            norm=LogNorm(), cmap='viridis')
-    axs[0, 1].set_title('Custom FFT Magnitude (Log)')
-    axs[0, 1].axis('off')
-    plt.colorbar(im1, ax=axs[0, 1])
+    im1 = axs[1].imshow(np.log1p(custom_magnitude), 
+                            norm=LogNorm(), cmap='gray')
+    axs[1].set_title('Custom FFT Magnitude (Log)')
+    axs[1].axis('off')
+    plt.colorbar(im1, ax=axs[1])
     
-    im2 = axs[0, 2].imshow(np.log1p(numpy_magnitude), 
-                            norm=LogNorm(), cmap='viridis')
-    axs[0, 2].set_title('NumPy FFT Magnitude (Log)')
-    axs[0, 2].axis('off')
-    plt.colorbar(im2, ax=axs[0, 2])
-    
-    # Difference Visualizations
-    im3 = axs[1, 0].imshow(magnitude_diff, cmap='hot')
-    axs[1, 0].set_title('Magnitude Absolute Difference')
-    axs[1, 0].axis('off')
-    plt.colorbar(im3, ax=axs[1, 0])
-    
-    im4 = axs[1, 1].imshow(phase_diff, cmap='cool')
-    axs[1, 1].set_title('Phase Absolute Difference')
-    axs[1, 1].axis('off')
-    plt.colorbar(im4, ax=axs[1, 1])
-    
-    # Histogram of Differences
-    axs[1, 2].hist(magnitude_diff.flatten(), bins=50, color='blue', alpha=0.7)
-    axs[1, 2].set_title('Magnitude Difference Distribution')
-    axs[1, 2].set_xlabel('Absolute Difference')
-    axs[1, 2].set_ylabel('Frequency')
+    im2 = axs[2].imshow(np.log1p(numpy_magnitude), 
+                            norm=LogNorm(), cmap='gray')
+    axs[2].set_title('NumPy FFT Magnitude (Log)')
+    axs[2].axis('off')
+    plt.colorbar(im2, ax=axs[2])
     
     plt.tight_layout()
     plt.show()
