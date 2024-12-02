@@ -18,15 +18,20 @@ def process_image_fft(image_path: str):
     # Load and convert image to grayscale
     image = Image.open(image_path).convert('L')
     
-    max_size = 256
-    if max(image.size) > max_size:
-        print(f"Resizing image to {max_size}x{max_size} for computational efficiency")
-        image = image.resize((max_size, max_size))
-    
     image_array = np.array(image)
     
+    M, N = image_array.shape
+    padded_M = 2**np.ceil(np.log2(M)).astype(int)
+    padded_N = 2**np.ceil(np.log2(N)).astype(int)
+    
+    # Create a zero array of the target size
+    padded_image = np.zeros((padded_M, padded_N), dtype=image_array.dtype)
+    
+    # Place the original image in the center
+    padded_image[:M, :N] = image_array
+    
     # Compute 2D FFT
-    fft_result = np.fft.fft2(image_array)
+    fft_result = np.fft.fft2(padded_image)
     
     # Shift zero frequency to center
     fft_shifted = np.fft.fftshift(fft_result)
@@ -86,18 +91,10 @@ def denoise(image_array: np.ndarray, cutoff_ratio: float = 0.1) -> np.ndarray:
     return denoised_image
 
 if __name__ == "__main__":
-    # Load and convert image to grayscale
-    image = Image.open("moonlanding.png").convert('L')
+    process_image_fft("test.jpg")
     
-    max_size = 256
-    if max(image.size) > max_size:
-        print(f"Resizing image to {max_size}x{max_size} for computational efficiency")
-        image = image.resize((max_size, max_size))
-    
-    image_array = np.array(image)
-    
-    denoised_image = denoise(image_array, cutoff_ratio=0.2)
-    plt.imshow(denoised_image, cmap='gray')
-    plt.title('Denoised Image')
-    plt.axis('off')
-    plt.show()
+    # denoised_image = denoise(image_array, cutoff_ratio=0.2)
+    # plt.imshow(denoised_image, cmap='gray')
+    # plt.title('Denoised Image')
+    # plt.axis('off')
+    # plt.show()

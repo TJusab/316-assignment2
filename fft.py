@@ -4,7 +4,6 @@ from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
-
 class FFT_Program:
     def __init__ (self, mode, image_path, fft):
         self.mode = mode
@@ -18,12 +17,6 @@ class FFT_Program:
     def process_image(self) :
         # Load image
         image = Image.open(self.image_path).convert('L')
-    
-        # Resize large images for computational efficiency (TODO REMOVE THIS PART LATER)
-        max_size = 256
-        if max(image.size) > max_size:
-            print(f"Resizing image to {max_size}x{max_size} for computational efficiency")
-            image = image.resize((max_size, max_size))
         
         self.image_array = np.array(image)
         padded_image, self.orig_M, self.orig_N = self.pad_to_power_of_2()
@@ -47,14 +40,18 @@ class FFT_Program:
         padded_M = 2**np.ceil(np.log2(M)).astype(int)
         padded_N = 2**np.ceil(np.log2(N)).astype(int)
     
+        # Create a zero array of the target size
         padded_image = np.zeros((padded_M, padded_N), dtype=self.image_array.dtype)
+    
+        # Place the original image in the center
         padded_image[:M, :N] = self.image_array
+    
         return padded_image, M, N
 
     def plot_FFT(self, fft_result):
         # Calculate magnitude spectrum (log scale)
         magnitude_spectrum = np.abs(fft_result)[:self.orig_M, :self.orig_N]
-        fig, axes = plt.subplots(1, 2, figsize=(18, 6))
+        fig, axes = plt.subplots(1, 2, figsize=(12, 6))
     
         # Display original image
         axes[0].imshow(self.image_array, cmap='gray')
@@ -75,27 +72,26 @@ class FFT_Program:
         plt.show()
         
     def plot_denoised(self, fft_denoised):
-        fig, axes = plt.subplots(1, 2, figsize=(18, 6))
-        
+        fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    
         # Display original image
         axes[0].imshow(self.image_array, cmap='gray')
         axes[0].set_title('Original Image')
         axes[0].axis('off')
-        
-        # Display the denoised image
-        axes[1].imshow(fft_denoised, cmap='gray')
+    
+        axes[1].imshow(fft_denoised[:self.orig_M, :self.orig_N], cmap='gray')
         axes[1].set_title('Denoised Image')
         axes[1].axis('off')
-        
+    
         plt.tight_layout()
         plt.show()
         
     def plot_compressed_images(self, images, counts, compression_ratios):
-        fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+        fig, axes = plt.subplots(2, 3, figsize=(12, 6))
     
         # Plot images
         for i, (ax, img, count) in enumerate(zip(axes.flat, images, counts)):
-            ax.imshow(img, cmap='gray')
+            ax.imshow(img[:self.orig_M, :self.orig_N], cmap='gray')
             compression_percent = compression_ratios[i] * 100
                 
             ax.set_title(f'Compression: {compression_percent:.1f}%\nNon-zero coeffs: {count}')
@@ -106,8 +102,8 @@ class FFT_Program:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--mode')
-    parser.add_argument('-i', '--image')
+    parser.add_argument('-m', '--mode', default="1")
+    parser.add_argument('-i', '--image', default="moonlanding.png")
     
     args = parser.parse_args()
     fft_instance = FFT_Implementation()
