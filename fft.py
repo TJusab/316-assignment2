@@ -28,8 +28,8 @@ class FFT_Program:
             fft_denoised = self.fft.denoise(padded_image)
             self.plot_denoised(fft_denoised)
         elif self.mode == "3":
-            ratios = [0, 0.1, 0.3, 0.5, 0.7, 0.99]
-            images, counts = self.fft.compress_threshold(padded_image, ratios)
+            ratios = [0, 0.1, 0.5, 0.9, 0.99, 0.999]
+            images, counts = self.fft.compress_frequency_based(padded_image)
             self.plot_compressed_images(images, counts, ratios)
         elif self.mode == "4":
             self.fft.benchmark_performance()
@@ -94,8 +94,9 @@ class FFT_Program:
             ax.imshow(img[:self.orig_M, :self.orig_N], cmap='gray')
             compression_percent = compression_ratios[i] * 100
                 
-            ax.set_title(f'Compression: {compression_percent:.1f}%\nNon-zero coeffs: {count}')
+            ax.set_title(f'Compression: {compression_percent:.1f}%')
             ax.axis('off')
+            print(f"Non-zero coefficients for {compression_percent:.1f}% compression: {count}\n")
     
         plt.tight_layout()
         plt.show()

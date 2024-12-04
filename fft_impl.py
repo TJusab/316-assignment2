@@ -147,7 +147,49 @@ class FFT_Implementation:
         
         return denoised
     
-    def compress_threshold(self, image_array: np.ndarray, compression_ratios: list = [0, 0.1, 0.3, 0.5, 0.7, 0.99]) -> list:
+    def denoise_by_thresholding(self, image_array: np.ndarray, threshold_method='hard', threshold_factor=0.1):
+        # Compute 2D FFT and shift
+        fft_result = self.shift_zero_frequency(self.fft_2d(image_array))
+    
+        # Compute the magnitude of FFT coefficients
+        magnitude = np.abs(fft_result)
+    
+        # Compute threshold
+        threshold = threshold_factor * np.max(magnitude)
+    
+        # Create a copy of the FFT result to modify
+        filtered_fft = fft_result.copy()
+    
+        if threshold_method == 'hard':
+            # Hard thresholding: zero out coefficients below threshold
+            filtered_fft[magnitude < threshold] = 0
+        elif threshold_method == 'soft':
+            # Soft thresholding: reduce magnitude of coefficients
+            mask = magnitude >= threshold
+            filtered_fft[mask] = np.sign(filtered_fft[mask]) * (np.abs(filtered_fft[mask]) - threshold)
+        elif threshold_method == 'percentage':
+            # Keep only top percentage of coefficients
+            sorted_magnitude = np.sort(magnitude.flatten())
+            threshold = sorted_magnitude[int(len(sorted_magnitude) * (1 - threshold_factor))]
+            filtered_fft[magnitude < threshold] = 0
+    
+        # Shift back and compute inverse FFT
+        filtered_fft = self.shift_zero_frequency_back(filtered_fft)
+        denoised = self.inverse_fft_2d(filtered_fft).real
+    
+        # Compute statistics
+        non_zero_count = np.count_nonzero(filtered_fft)
+        total_coefficients = image_array.shape[0] * image_array.shape[1]
+        fraction_retained = non_zero_count / total_coefficients
+    
+        print(f"Thresholding Method: {threshold_method}")
+        print(f"Threshold Value: {threshold}")
+        print(f"Non-zero coefficients retained: {non_zero_count}")
+        print(f"Fraction of original Fourier coefficients retained: {fraction_retained:.4f}")
+    
+        return denoised
+    
+    def compress_threshold(self, image_array: np.ndarray, compression_ratios: list = [0, 0.1, 0.5, 0.9, 0.99, 0.999]) -> list:
         # Compute FFT and shift to center
         fft_result = self.fft_2d(image_array)
         shifted_fft = self.shift_zero_frequency(fft_result)
